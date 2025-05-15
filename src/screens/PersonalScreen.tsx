@@ -1,19 +1,62 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAppDispatch } from "../store"
+import { logout } from "../store/slices/authSlice"
+import { useGetUserProfileQuery } from "../store/api/userApi"
 
 const PersonalScreen: React.FC = () => {
-  const [balance] = useState("0.00")
-  const [assets] = useState("0.00")
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const { data: userProfile, isLoading, error } = useGetUserProfileQuery()
+
+  const handleLogout = async () => {
+    await dispatch(logout())
+    navigate("/login")
+  }
 
   const menuItems = [
     { icon: "history", label: "History" },
     { icon: "user", label: "Personal information" },
+    { icon: "shield", label: "Advanced Identity Authentication" },
+    { icon: "link", label: "Bind Blockchain Address" },
     { icon: "lock", label: "Change Login Password" },
+    { icon: "key", label: "Change withdrawal password" },
+    { icon: "google", label: "Bind Google Authenticator" },
     { icon: "info", label: "About us" },
+    { icon: "file", label: "White paper" },
   ]
 
+  const featureItems = [
+    { icon: "gift", label: "Welfare", color: "text-amber-600" },
+    { icon: "gamepad", label: "Sim Trade", color: "text-amber-600" },
+    { icon: "diamond", label: "Level", color: "text-amber-600" },
+    { icon: "bell", label: "Notify", color: "text-amber-600" },
+    { icon: "coin", label: "Lending", color: "text-amber-600" },
+    { icon: "bolt", label: "Fast trade", color: "text-amber-600" },
+    { icon: "users", label: "Invite", color: "text-amber-600" },
+    { icon: "message", label: "Live Chat", color: "text-amber-600" },
+  ]
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-red-500">Error loading profile. Please try again.</p>
+        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-amber-500 text-white rounded">
+          Reload
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="pb-16">
@@ -23,12 +66,14 @@ const PersonalScreen: React.FC = () => {
           <span className="text-white text-2xl">M</span>
         </div>
         <div>
-          <div className="font-medium">der****.com</div>
+          <div className="font-medium">{userProfile?.email || "der****.com"}</div>
           <div className="flex items-center mt-1">
-            <span className="bg-black text-white text-xs px-2 py-0.5 rounded mr-2">Credit 51</span>
-            <span className="bg-green-800 text-white text-xs px-2 py-0.5 rounded">Lv1</span>
+            <span className="bg-black text-white text-xs px-2 py-0.5 rounded mr-2">
+              Credit {userProfile?.creditLevel || 51}
+            </span>
+            <span className="bg-green-800 text-white text-xs px-2 py-0.5 rounded">Lv{userProfile?.level || 1}</span>
           </div>
-          <div className="text-xs text-gray-500 mt-1">UID: 1540096</div>
+          <div className="text-xs text-gray-500 mt-1">UID: {userProfile?.uid || "1540096"}</div>
         </div>
       </div>
 
@@ -36,7 +81,7 @@ const PersonalScreen: React.FC = () => {
       <div className="bg-white p-4 mb-2">
         <div className="text-gray-500 text-sm">Balance</div>
         <div className="flex justify-between items-center">
-          <div className="text-2xl font-bold">{balance}</div>
+          <div className="text-2xl font-bold">{userProfile?.balance || "0.00"}</div>
           <button className="bg-gray-100 p-2 rounded">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +99,7 @@ const PersonalScreen: React.FC = () => {
             </svg>
           </button>
         </div>
-        <div className="text-sm text-gray-500">Assets: {assets}</div>
+        <div className="text-sm text-gray-500">Assets: {userProfile?.assets || "0.00"}</div>
 
         {/* Withdrawal and Recharge buttons */}
         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -97,6 +142,20 @@ const PersonalScreen: React.FC = () => {
         </div>
       </div>
 
+      {/* Feature grid */}
+      <div className="bg-white p-4 mb-2">
+        <div className="grid grid-cols-4 gap-4">
+          {featureItems.map((item, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${item.color}`}>
+                <FeatureIcon name={item.icon} />
+              </div>
+              <span className="text-xs">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Menu items */}
       <div className="bg-white mb-2">
         {menuItems.map((item, index) => (
@@ -127,7 +186,9 @@ const PersonalScreen: React.FC = () => {
 
       {/* Logout button */}
       <div className="px-4 mb-4">
-        <button className="w-full bg-amber-500 text-white py-3 rounded">Log out</button>
+        <button className="w-full bg-amber-500 text-white py-3 rounded" onClick={handleLogout}>
+          Log out
+        </button>
       </div>
     </div>
   )

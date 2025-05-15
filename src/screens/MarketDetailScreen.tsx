@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { useGetMarketDetailQuery } from "../store/api/marketApi"
 import OptionsModal from "../components/OptionModal"
 
 const MarketDetailScreen: React.FC = () => {
@@ -11,8 +12,29 @@ const MarketDetailScreen: React.FC = () => {
   const [timeInterval, setTimeInterval] = useState("1h")
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
 
-  // This would normally come from an API or props
-  const marketData = {
+  const { data: marketData, isLoading, error } = useGetMarketDetailQuery(symbol || "")
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-white">
+        <p className="text-red-400 mb-4">Error loading market data</p>
+        <button onClick={() => navigate(-1)} className="bg-amber-500 text-black px-4 py-2 rounded">
+          Go Back
+        </button>
+      </div>
+    )
+  }
+
+  // Fallback data if API fails
+  const fallbackData = {
     symbol: symbol || "ETH",
     price: "2,594.34",
     priceUsd: "$2,594.34",
@@ -21,6 +43,9 @@ const MarketDetailScreen: React.FC = () => {
     low: "2,416.04",
     volume24h: "235,942.98",
   }
+
+  // Use API data or fallback
+  const displayData = marketData || fallbackData
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
@@ -41,30 +66,30 @@ const MarketDetailScreen: React.FC = () => {
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <h1 className="text-xl font-bold">{marketData.symbol}</h1>
+        <h1 className="text-xl font-bold">{displayData.symbol}</h1>
         <div className="w-6"></div> {/* Spacer for alignment */}
       </div>
 
       {/* Price and Stats */}
       <div className="px-4 pb-4">
         <div className="flex items-baseline">
-          <span className="text-3xl font-bold text-green-400">{marketData.price}</span>
-          <span className="ml-4 text-green-400">{marketData.changePercent}</span>
+          <span className="text-3xl font-bold text-green-400">{displayData.price}</span>
+          <span className="ml-4 text-green-400">{displayData.changePercent}</span>
         </div>
-        <div className="text-gray-400 text-sm">≈{marketData.priceUsd}</div>
+        <div className="text-gray-400 text-sm">≈{displayData.priceUsd}</div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div>
             <div className="text-gray-400 text-sm">High</div>
-            <div className="text-green-400">{marketData.high}</div>
+            <div className="text-green-400">{displayData.high}</div>
           </div>
           <div className="text-right">
             <div className="text-gray-400 text-sm">Low</div>
-            <div className="text-green-400">{marketData.low}</div>
+            <div className="text-green-400">{displayData.low}</div>
           </div>
           <div>
             <div className="text-gray-400 text-sm">24Hrs</div>
-            <div className="text-green-400">{marketData.volume24h}</div>
+            <div className="text-green-400">{displayData.volume24h}</div>
           </div>
         </div>
       </div>
@@ -128,7 +153,7 @@ const MarketDetailScreen: React.FC = () => {
       <OptionsModal
         isOpen={isOptionsModalOpen}
         onClose={() => setIsOptionsModalOpen(false)}
-        symbol={marketData.symbol}
+        symbol={displayData.symbol}
         price="102,997.32"
         changePercent="-1.1%"
       />
