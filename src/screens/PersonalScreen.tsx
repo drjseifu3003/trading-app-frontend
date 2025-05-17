@@ -5,10 +5,15 @@ import { useNavigate } from "react-router-dom"
 import { useAppDispatch } from "../store"
 import { logout } from "../store/slices/authSlice"
 import { useGetUserProfileQuery } from "../store/api/userApi"
+import { useState } from "react"
+import PersonalInfoForm from "../components/PersonalInformationModal"
+import ChangePasswordModal from "../components/ChangePasswordModal"
 
 const PersonalScreen: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false)
+  const [showChangeLoginPasswordModal, setShowChangeLoginPasswordModal] = useState(false)
   const { data: userProfile, isLoading, error } = useGetUserProfileQuery()
 
   const handleLogout = async () => {
@@ -17,27 +22,12 @@ const PersonalScreen: React.FC = () => {
   }
 
   const menuItems = [
-    { icon: "history", label: "History" },
+    { icon: "history", label: "History"},
     { icon: "user", label: "Personal information" },
-    { icon: "shield", label: "Advanced Identity Authentication" },
-    { icon: "link", label: "Bind Blockchain Address" },
     { icon: "lock", label: "Change Login Password" },
-    { icon: "key", label: "Change withdrawal password" },
-    { icon: "google", label: "Bind Google Authenticator" },
     { icon: "info", label: "About us" },
-    { icon: "file", label: "White paper" },
   ]
 
-  const featureItems = [
-    { icon: "gift", label: "Welfare", color: "text-amber-600" },
-    { icon: "gamepad", label: "Sim Trade", color: "text-amber-600" },
-    { icon: "diamond", label: "Level", color: "text-amber-600" },
-    { icon: "bell", label: "Notify", color: "text-amber-600" },
-    { icon: "coin", label: "Lending", color: "text-amber-600" },
-    { icon: "bolt", label: "Fast trade", color: "text-amber-600" },
-    { icon: "users", label: "Invite", color: "text-amber-600" },
-    { icon: "message", label: "Live Chat", color: "text-amber-600" },
-  ]
 
   if (isLoading) {
     return (
@@ -59,21 +49,20 @@ const PersonalScreen: React.FC = () => {
   }
 
   return (
-    <div className="pb-16">
+    <div className="pb-16 relative">
       {/* Header with user info */}
       <div className="bg-white p-4 mb-2 flex items-center">
         <div className="w-14 h-14 bg-indigo-900 rounded-full flex items-center justify-center mr-4">
           <span className="text-white text-2xl">M</span>
         </div>
         <div>
-          <div className="font-medium">{userProfile?.email || "der****.com"}</div>
+          <div className="font-medium">{userProfile?.full_name ?? "No Name"}</div>
           <div className="flex items-center mt-1">
             <span className="bg-black text-white text-xs px-2 py-0.5 rounded mr-2">
-              Credit {userProfile?.creditLevel || 51}
+              Credit Score {userProfile?.credit_score}
             </span>
-            <span className="bg-green-800 text-white text-xs px-2 py-0.5 rounded">Lv{userProfile?.level || 1}</span>
+            <span className="bg-green-800 text-white text-xs px-2 py-0.5 rounded">Lv {userProfile?.verification_level}</span>
           </div>
-          <div className="text-xs text-gray-500 mt-1">UID: {userProfile?.uid || "1540096"}</div>
         </div>
       </div>
 
@@ -81,7 +70,7 @@ const PersonalScreen: React.FC = () => {
       <div className="bg-white p-4 mb-2">
         <div className="text-gray-500 text-sm">Balance</div>
         <div className="flex justify-between items-center">
-          <div className="text-2xl font-bold">{userProfile?.balance || "0.00"}</div>
+          <div className="text-2xl font-bold">{userProfile?.cash || "0.00"}</div>
           <button className="bg-gray-100 p-2 rounded">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +88,7 @@ const PersonalScreen: React.FC = () => {
             </svg>
           </button>
         </div>
-        <div className="text-sm text-gray-500">Assets: {userProfile?.assets || "0.00"}</div>
+        <div className="text-sm text-gray-500">Margin: {userProfile?.margin || "0.00"}</div>
 
         {/* Withdrawal and Recharge buttons */}
         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -142,24 +131,28 @@ const PersonalScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Feature grid */}
-      <div className="bg-white p-4 mb-2">
-        <div className="grid grid-cols-4 gap-4">
-          {featureItems.map((item, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${item.color}`}>
-                <FeatureIcon name={item.icon} />
-              </div>
-              <span className="text-xs">{item.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Menu items */}
       <div className="bg-white mb-2">
         {menuItems.map((item, index) => (
-          <div key={index} className="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0">
+          <div 
+          key={index} 
+          className="flex items-center justify-between p-4 border-b border-gray-100 last:border-b-0 cursor-pointer"
+          onClick={() => {
+            switch(index) {
+              case 0:
+                // setShowPersonalInfoModal(true)
+                break;
+              case 1:
+                setShowPersonalInfoModal(true)
+                break;
+              case 2:
+                setShowChangeLoginPasswordModal(true)
+                break;
+
+            }
+          }
+          }
+          >
             <div className="flex items-center">
               <div className="w-5 h-5 text-amber-500 mr-3">
                 <MenuIcon name={item.icon} />
@@ -190,160 +183,20 @@ const PersonalScreen: React.FC = () => {
           Log out
         </button>
       </div>
+      {
+        showPersonalInfoModal && (
+          <PersonalInfoForm onClose={() => setShowPersonalInfoModal(false)} isOpen={showPersonalInfoModal}/>
+        )
+      }
+      {
+        showChangeLoginPasswordModal && (
+          <ChangePasswordModal onClose={() => setShowChangeLoginPasswordModal(false)} isOpen={showChangeLoginPasswordModal}/>
+        )
+      }
     </div>
   )
 }
 
-// Helper component for feature icons
-const FeatureIcon: React.FC<{ name: string }> = ({ name }) => {
-  switch (name) {
-    case "gift":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 12 20 22 4 22 4 12" />
-          <rect x="2" y="7" width="20" height="5" />
-          <line x1="12" y1="22" x2="12" y2="7" />
-          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
-          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-        </svg>
-      )
-    case "gamepad":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="6" y1="12" x2="10" y2="12" />
-          <line x1="8" y1="10" x2="8" y2="14" />
-          <line x1="15" y1="13" x2="15" y2="13" />
-          <line x1="17" y1="11" x2="17" y2="11" />
-          <rect x="2" y="6" width="20" height="12" rx="2" />
-        </svg>
-      )
-    case "diamond":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M16 2H8l-4 6h16l-4-6z" />
-          <path d="M12 22l-6.5-9.5L12 8l6.5 4.5L12 22z" />
-        </svg>
-      )
-    case "bell":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-      )
-    case "coin":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="16" />
-          <line x1="8" y1="12" x2="16" y2="12" />
-        </svg>
-      )
-    case "bolt":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-        </svg>
-      )
-    case "users":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-      )
-    case "message":
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      )
-    default:
-      return null
-  }
-}
 
 // Helper component for menu icons
 const MenuIcon: React.FC<{ name: string }> = ({ name }) => {

@@ -1,12 +1,14 @@
 import { api } from "./apiSlice"
 
 export interface UserProfile {
-  email: string
-  uid: string
-  creditLevel: number
-  level: number
-  balance: string
-  assets: string
+  user_id: string
+  full_name: string
+  phone_number: string
+  credit_score: number
+  verification_level: number
+  kyc_verified: boolean
+  cash: number
+  margin: number
 }
 
 export interface TransactionHistory {
@@ -21,7 +23,7 @@ export interface TransactionHistory {
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getUserProfile: builder.query<UserProfile, void>({
-      query: () => "/user/profile",
+      query: () => "/profile.php",
       providesTags: ["User"],
     }),
 

@@ -38,7 +38,7 @@ export const login = createAsyncThunk<LoginResponse, LoginCredentials, { rejectV
   async (credentials, { rejectWithValue }) => {
     try {
       // In a real app, this would be an API call
-      const response = await fetch("https://api.mdexpro.example/auth/login", {
+      const response = await fetch("http://onchainvip.etoure.com/api/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

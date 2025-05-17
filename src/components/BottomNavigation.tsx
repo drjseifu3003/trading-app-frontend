@@ -24,12 +24,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ activeTab, setActiv
         onClick={() => setActiveTab("trading")}
       />
       <NavItem
-        icon={<CircleInfoIcon active={activeTab === "ieo"} />}
-        label="IEO"
-        isActive={activeTab === "ieo"}
-        onClick={() => setActiveTab("ieo")}
-      />
-      <NavItem
         icon={<BellIcon active={activeTab === "news"} />}
         label="News"
         isActive={activeTab === "news"}

@@ -4,11 +4,14 @@ import type React from "react"
 import { useState } from "react"
 import TabGroup from "../components/TabGroup"
 import TradingModal from "../components/TradingModal"
+import { useGetUserProfileQuery } from "../store/api/userApi"
 
 const TradingScreen: React.FC = () => {
   const [tradingTab, setTradingTab] = useState("Contract")
   const [positionsTab, setPositionsTab] = useState("Positions")
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const {data} = useGetUserProfileQuery()
 
   return (
     <div>
@@ -24,22 +27,11 @@ const TradingScreen: React.FC = () => {
         <div className="flex justify-between mb-4">
           <div>
             <div className="text-sm text-gray-500">Balance</div>
-            <div className="text-xl font-bold">0.00</div>
+            <div className="text-xl font-bold">{data?.cash}</div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-gray-500">Assets</div>
-            <div className="text-xl font-bold">0.00</div>
-          </div>
-        </div>
-
-        <div className="flex justify-between">
-          <div>
-            <div className="text-sm text-gray-500">Daily Profit</div>
-            <div className="text-green-600">+0.00</div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-500">Total Profit</div>
-            <div className="text-green-600">+0.00</div>
+            <div className="text-sm text-gray-500">Margin</div>
+            <div className="text-xl font-bold">{data?.margin}</div>
           </div>
         </div>
 
