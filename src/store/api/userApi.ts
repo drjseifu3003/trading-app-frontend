@@ -2,13 +2,16 @@ import { api } from "./apiSlice"
 
 export interface UserProfile {
   user_id: string
-  full_name: string
-  phone_number: string
+  full_name?: string
+  phone?: string
   credit_score: number
   verification_level: number
   kyc_verified: boolean
   cash: number
   margin: number
+  government_id?: string
+  geneder?: string
+  address?: string
 }
 
 export interface TransactionHistory {
@@ -32,14 +35,16 @@ export const userApi = api.injectEndpoints({
       providesTags: ["Transaction"],
     }),
 
-    updateUserProfile: builder.mutation<UserProfile, Partial<UserProfile>>({
-      query: (data) => ({
-        url: "/user/profile",
-        method: "PATCH",
-        body: data,
+    updateUserProfile: builder.mutation<UserProfile, FormData>({
+      query: (formData) => ({
+        url: "/profile.php",
+        method: "POST",
+        body: formData,
+        // Do NOT set 'Content-Type' header here, let browser handle it.
       }),
       invalidatesTags: ["User"],
     }),
+
 
     withdrawFunds: builder.mutation<{ success: boolean }, { amount: string; address: string }>({
       query: (data) => ({

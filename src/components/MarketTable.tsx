@@ -1,7 +1,9 @@
+import { useRouter } from "next/navigation"
 import type React from "react"
 
 interface MarketItem {
   name: string
+  symbol: string
   price: string
   change: string
   isPositive: boolean
@@ -13,6 +15,7 @@ interface MarketTableProps {
 }
 
 const MarketTable: React.FC<MarketTableProps> = ({ items }) => {
+  const router = useRouter()
   return (
     <table className="w-full">
       <thead>
@@ -25,7 +28,7 @@ const MarketTable: React.FC<MarketTableProps> = ({ items }) => {
       </thead>
       <tbody>
         {items.map((item, index) => (
-          <tr key={index}>
+          <tr key={index} onClick={() => {router.push(`/market/${item.symbol}`)}} className="cursor-pointer hover:bg-gray-100">
             <td className="py-3 px-1 border-b border-gray-200 flex items-center">
               {item.icon && <span className="mr-2">{item.icon}</span>}
               {item.name}

@@ -3,7 +3,6 @@
 import { useState } from "react"
 
 import type React from "react"
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { useAppSelector } from "./store"
 import { selectIsAuthenticated } from "./store/slices/authSlice"
 import Header from "./components/Header"
@@ -13,16 +12,17 @@ import TradingScreen from "./screens/TradingScreen"
 import IEOScreen from "./screens/IEOScreen"
 import NewsScreen from "./screens/NewsScreen"
 import PersonalScreen from "./screens/PersonalScreen"
-import MarketDetailScreen from "./screens/MarketDetailScreen"
-import LoginScreen from "./screens/LoginScreen"
+import { useRouter } from "next/navigation"
 
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter()
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // return <Navigate to="/login" replace />
+    router.push('/login')
   }
 
   return <>{children}</>
@@ -60,28 +60,10 @@ function MainLayout() {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginScreen />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/market/:symbol"
-          element={
-            <ProtectedRoute>
-              <MarketDetailScreen />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <ProtectedRoute>
+      <MainLayout />
+    </ProtectedRoute>
+
   )
 }
 

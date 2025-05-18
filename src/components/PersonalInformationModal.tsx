@@ -1,12 +1,29 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import * as React from "react"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { ChevronDown, Upload, X } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { useGetUserProfileQuery, useUpdateUserProfileMutation } from "../store/api/userApi"
+
+
+const formSchema = z.object({
+  fullName: z.string().min(1),
+  gender: z.string().optional(),
+  address: z.string().min(1),
+  phone: z.string().min(1),
+  document: z.any().optional(),
+})
+
+type FormValues = z.infer<typeof formSchema>
 
 interface PersonalInfoModalProps {
   isOpen: boolean
@@ -14,34 +31,56 @@ interface PersonalInfoModalProps {
 }
 
 const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isOpen, onClose }) => {
-  const [files, setFiles] = useState<File[]>([])
-  const [filePreview, setFilePreview] = useState<string | null>(null)
+  const { data: userProfile } = useGetUserProfileQuery()
+  const [UpdateProfile, {isLoading}] = useUpdateUserProfileMutation()
+  const [filePreview, setFilePreview] = useState<string | null>(userProfile?.government_id ? `http://onchainvip.etoure.com/uploads/${userProfile?.government_id}` : null)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files)
-      setFiles([...files, ...newFiles])
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: userProfile?.full_name ?? "",
+      gender: userProfile?.geneder ?? "male",
+      address: userProfile?.address ?? "",
+      phone: userProfile?.phone ?? "",
+      document: undefined,
+    },
+  })
 
-      // Create preview for the first file
+  const { setValue, watch, handleSubmit, reset } = form
+  const document = watch("document")
+
+  useEffect(() => {
+    if (document instanceof File) {
       const reader = new FileReader()
-      reader.onload = () => {
-        setFilePreview(reader.result as string)
+      reader.onload = () => setFilePreview(reader.result as string)
+      reader.readAsDataURL(document)
+    }
+  }, [document])
+
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const formData = new FormData()
+
+      formData.append("full_name", data.fullName)
+      if (data.gender) formData.append("gender", data.gender)
+      formData.append("address", data.address)
+      formData.append("phone", data.phone)
+      if (data.document instanceof File) {
+        formData.append("government_id", data.document)
       }
-      reader.readAsDataURL(newFiles[0])
+
+      // Assuming your update API supports multipart/form-data
+      await UpdateProfile(formData).unwrap()
+
+      alert("Profile updated successfully")
+
+      // onClose()
+    } catch (error) {
+      console.error("Update failed", error)
     }
   }
 
-  const removeFile = () => {
-    setFiles([])
-    setFilePreview(null)
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission here
-    console.log("Form submitted")
-    onClose()
-  }
 
   if (!isOpen) return null
 
@@ -63,135 +102,132 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isOpen, onClose }
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-md mx-auto p-4">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="surname">Surname</Label>
-              <Input id="surname" placeholder="Surname" className="bg-gray-50" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" placeholder="First name" className="bg-gray-50" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select>
-                <SelectTrigger className="bg-gray-50">
-                  <SelectValue placeholder="Gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                  <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="birthday">Birthday</Label>
-              <Input id="birthday" placeholder="Birthday" type="date" className="bg-gray-50" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
-              <Select defaultValue="us">
-                <SelectTrigger className="bg-gray-50">
-                  <SelectValue placeholder="Country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="us">United States</SelectItem>
-                  <SelectItem value="ca">Canada</SelectItem>
-                  <SelectItem value="uk">United Kingdom</SelectItem>
-                  <SelectItem value="au">Australia</SelectItem>
-                  <SelectItem value="de">Germany</SelectItem>
-                  <SelectItem value="fr">France</SelectItem>
-                  <SelectItem value="jp">Japan</SelectItem>
-                  <SelectItem value="cn">China</SelectItem>
-                  <SelectItem value="in">India</SelectItem>
-                  <SelectItem value="br">Brazil</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input id="address" placeholder="Address" className="bg-gray-50" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone number</Label>
-              <div className="flex">
-                <div className="flex items-center bg-gray-50 border rounded-l-md px-3 border-r-0">
-                  <span className="text-sm flex items-center gap-1">
-                    <span className="inline-block w-5">🇺🇸</span> +1 <ChevronDown className="h-4 w-4" />
-                  </span>
-                </div>
-                <Input id="phone" placeholder="Phone number" className="bg-gray-50 rounded-l-none" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="document">ID Document Upload</Label>
-              <div className="border-2 border-dashed rounded-md p-6 bg-gray-50">
-                {filePreview ? (
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <img
-                        src={filePreview || "/placeholder.svg"}
-                        alt="Document preview"
-                        className="max-h-40 mx-auto object-contain"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeFile}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <p className="text-sm text-center text-gray-500">{files.map((file) => file.name).join(", ")}</p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer rounded-md bg-white font-semibold text-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
-                      >
-                        <span>Upload a file</span>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                          accept="image/*,.pdf"
-                          onChange={handleFileChange}
-                        />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs leading-5 text-gray-600">
-                      PNG, JPG, PDF up to 10MB (ID, passport, driving license)
-                    </p>
-                  </div>
+          <Form {...form}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl><Input {...field} className="bg-gray-50" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-            </div>
-          </form>
+              />
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gender</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-gray-50">
+                          <SelectValue placeholder="Gender" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl><Input {...field} className="bg-gray-50" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <div className="flex">
+                        <Input {...field} className="bg-gray-50 rounded-l-none" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="document"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ID Document Upload</FormLabel>
+                    <FormControl>
+                      <div className="border-2 border-dashed rounded-md p-6 bg-gray-50">
+                        {filePreview ? (
+                          <div className="space-y-4 relative">
+                            <img src={filePreview} alt="Document" className="max-h-40 mx-auto object-contain" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFilePreview(null)
+                                setValue("document", undefined)
+                              }}
+                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                            <div className="mt-4 flex text-sm text-gray-600 justify-center">
+                              <label htmlFor="file-upload" className="cursor-pointer text-primary font-semibold">
+                                Upload a file
+                                <input
+                                  id="file-upload"
+                                  type="file"
+                                  accept="image/*,.pdf"
+                                  className="sr-only"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) field.onChange(file)
+                                  }}
+                                />
+                              </label>
+                              <p className="pl-1">or drag and drop</p>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              PNG, JPG, PDF up to 10MB (ID, passport, driving license)
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
         </div>
       </div>
 
-      {/* Footer with Save button */}
+      {/* Footer */}
       <div className="p-4 border-t border-gray-200">
         <Button
           type="submit"
-          onClick={handleSubmit}
+          disabled={isLoading}
+          onClick={handleSubmit(onSubmit)}
           className="w-full bg-amber-500 hover:bg-amber-600 text-white py-4 h-auto text-base font-medium"
         >
-          Save
+          {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
     </div>

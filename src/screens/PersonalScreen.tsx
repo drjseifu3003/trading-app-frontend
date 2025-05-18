@@ -1,16 +1,16 @@
 "use client"
 
 import type React from "react"
-import { useNavigate } from "react-router-dom"
 import { useAppDispatch } from "../store"
 import { logout } from "../store/slices/authSlice"
 import { useGetUserProfileQuery } from "../store/api/userApi"
 import { useState } from "react"
 import PersonalInfoForm from "../components/PersonalInformationModal"
 import ChangePasswordModal from "../components/ChangePasswordModal"
+import { useRouter } from "next/navigation"
 
 const PersonalScreen: React.FC = () => {
-  const navigate = useNavigate()
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false)
   const [showChangeLoginPasswordModal, setShowChangeLoginPasswordModal] = useState(false)
@@ -18,7 +18,7 @@ const PersonalScreen: React.FC = () => {
 
   const handleLogout = async () => {
     await dispatch(logout())
-    navigate("/login")
+    router.push("/login")
   }
 
   const menuItems = [
@@ -53,7 +53,7 @@ const PersonalScreen: React.FC = () => {
       {/* Header with user info */}
       <div className="bg-white p-4 mb-2 flex items-center">
         <div className="w-14 h-14 bg-indigo-900 rounded-full flex items-center justify-center mr-4">
-          <span className="text-white text-2xl">M</span>
+          <span className="text-white text-2xl">{userProfile?.full_name ? userProfile?.full_name?.charAt(0) : ""}</span>
         </div>
         <div>
           <div className="font-medium">{userProfile?.full_name ?? "No Name"}</div>

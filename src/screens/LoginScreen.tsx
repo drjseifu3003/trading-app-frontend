@@ -2,26 +2,26 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import { useAppDispatch, useAppSelector } from "../store"
 import { login, selectAuth, clearError } from "../store/slices/authSlice"
+import { useRouter } from "next/navigation"
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const navigate = useNavigate()
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const { isAuthenticated, isLoading, error } = useAppSelector(selectAuth)
 
   useEffect(() => {
     // If user is already authenticated, redirect to home
     if (isAuthenticated) {
-      navigate("/")
+      router.push("/")
     }
 
     // Clear any errors when component mounts
     dispatch(clearError())
-  }, [isAuthenticated, navigate, dispatch])
+  }, [isAuthenticated, dispatch, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -113,7 +113,7 @@ const LoginScreen: React.FC = () => {
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="#" className="font-medium text-amber-500 hover:text-amber-400">
+            <a href="/signup" className="font-medium text-amber-500 hover:text-amber-400">
               Sign up
             </a>
           </p>

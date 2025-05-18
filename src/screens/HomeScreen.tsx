@@ -17,12 +17,14 @@ const HomeScreen: React.FC = () => {
   const cryptoItems = [
     {
       name: "BTC",
+      symbol: "BTCUSDT",
       price: "104,039.23",
       change: "-0.08%",
       isPositive: false,
     },
     {
       name: "ETH",
+      symbol: "ETHUSDT",
       price: "2,615.33",
       change: "+3.81%",
       isPositive: true,
@@ -30,12 +32,14 @@ const HomeScreen: React.FC = () => {
     {
       name: "LTC",
       price: "102.02",
+      symbol: "LTCUSDT",
       change: "+1.93%",
       isPositive: true,
     },
     {
       name: "BNB",
       price: "662.17",
+      symbol: "BNBUSDT",
       change: "+1.64%",
       isPositive: true,
     },
@@ -44,6 +48,7 @@ const HomeScreen: React.FC = () => {
   const forexItems = [
     {
       name: "GBPUSD",
+      symbol: "GBPUSD",
       price: "1.32937",
       change: "+0.29%",
       isPositive: true,
@@ -51,6 +56,7 @@ const HomeScreen: React.FC = () => {
     },
     {
       name: "EURUSD",
+      symbol: "EURUSD",
       price: "1.11708",
       change: "-0.11%",
       isPositive: false,
@@ -58,6 +64,7 @@ const HomeScreen: React.FC = () => {
     },
     {
       name: "AUDUSD",
+      symbol: "AUDUSD",
       price: "0.64733",
       change: "+0.77%",
       isPositive: true,
@@ -115,8 +122,8 @@ const HomeScreen: React.FC = () => {
 
       <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
         <div className="flex gap-3 overflow-x-auto py-2">
-          <CryptoCard name="BTC" price="$104,039.23" change="-0.08%" type="btc" />
-          <CryptoCard name="ETH" price="$2,615.33" change="+3.81%" type="eth" />
+          <CryptoCard name="BTCUSDT" price="$104,039.23" change="-0.08%" type="btc" />
+          <CryptoCard name="ETHUSDT" price="$2,615.33" change="+3.81%" type="eth" />
         </div>
 
         <div className="mt-4">

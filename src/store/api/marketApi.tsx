@@ -60,7 +60,16 @@ export const marketApi = api.injectEndpoints({
       },
       providesTags: ["Market"],
     }),
+
+    addTrade: builder.mutation<{message: string}, { symbol: string, time: string; currency_pair: number, expected_profit_loss: number, final_profit_loss: number }>({
+      query: (data) => ({
+        url: "/trade.php",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Market"],
+    })
   }),
 })
 
-export const { useGetMarketsQuery, useGetMarketDetailQuery, useGetForexMarketsQuery } = marketApi
+export const { useGetMarketsQuery, useGetMarketDetailQuery, useGetForexMarketsQuery, useAddTradeMutation } = marketApi

@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
 import type { RootState } from "../index"
+import { getToken, removeToken, setToken } from "@/lib/tokenStorage"
+import { set } from "react-hook-form"
 
 interface AuthState {
   user: {
@@ -14,8 +16,8 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: null,
-  isAuthenticated: false,
+  token: getToken() || null,
+  isAuthenticated: getToken() ? true : false,
   isLoading: false,
   error: null,
 }
@@ -54,7 +56,39 @@ export const login = createAsyncThunk<LoginResponse, LoginCredentials, { rejectV
       const data = await response.json()
 
       // Save token to localStorage
-      localStorage.setItem("token", data.token)
+      // localStorage.setItem("token", data.token)
+      setToken(data.token)
+
+      return data
+    } catch (error) {
+      return rejectWithValue("Network error. Please try again.")
+    }
+  },
+)
+
+export const signup = createAsyncThunk<LoginResponse, LoginCredentials, { rejectValue: string }>(
+  "auth/signup",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      // In a real app, this would be an API call
+      const response = await fetch("http://onchainvip.etoure.com/api/signup.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(credentials),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        return rejectWithValue(errorData.message || "Login failed")
+      }
+
+      const data = await response.json()
+
+      // Save token to localStorage
+      // localStorage.setItem("token", data.token)
+      setToken(data.token)
 
       return data
     } catch (error) {
@@ -65,7 +99,8 @@ export const login = createAsyncThunk<LoginResponse, LoginCredentials, { rejectV
 
 export const logout = createAsyncThunk("auth/logout", async () => {
   // Remove token from localStorage
-  localStorage.removeItem("token")
+  removeToken()
+  // localStorage.removeItem("token")
 
   // In a real app, you might want to call an API to invalidate the token
   return true
@@ -92,6 +127,20 @@ const authSlice = createSlice({
         state.token = action.payload.token
       })
       .addCase(login.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+      .addCase(signup.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(signup.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
+        state.isLoading = false
+        state.isAuthenticated = true
+        state.user = action.payload.user
+        state.token = action.payload.token
+      })
+      .addCase(signup.rejected, (state, action) => {
         state.isLoading = false
         state.error = action.payload as string
       })

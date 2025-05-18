@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import type React from "react"
 import { useNavigate } from "react-router-dom"
 
@@ -11,14 +12,14 @@ interface CryptoCardProps {
 }
 
 const CryptoCard: React.FC<CryptoCardProps> = ({ name, price, change, type }) => {
-  const navigate = useNavigate()
+  const router = useRouter()
   const isPositive = change.startsWith("+")
 
   const bgClass =
     type === "btc" ? "bg-gradient-to-br from-yellow-300 to-yellow-500" : "bg-gradient-to-br from-gray-100 to-blue-400"
 
   const handleClick = () => {
-    navigate(`/market/${name}`)
+    router.push(`/market/${name}`)
   }
 
   return (
