@@ -33,7 +33,7 @@ interface PersonalInfoModalProps {
 const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isOpen, onClose }) => {
   const { data: userProfile } = useGetUserProfileQuery()
   const [UpdateProfile, {isLoading}] = useUpdateUserProfileMutation()
-  const [filePreview, setFilePreview] = useState<string | null>(userProfile?.government_id ? `http://onchainvip.etoure.com/uploads/${userProfile?.government_id}` : null)
+  const [filePreview, setFilePreview] = useState<string | null>(userProfile?.government_id ? `http://localhost:8000/uploads/${userProfile?.government_id}` : null)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

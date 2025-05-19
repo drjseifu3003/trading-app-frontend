@@ -1,5 +1,6 @@
 import type React from "react"
 import { api } from "./apiSlice"
+import { HistoryItem } from "@/src/components/HistoryModal"
 
 export interface MarketData {
   symbol: string
@@ -44,20 +45,13 @@ export const marketApi = api.injectEndpoints({
       providesTags: (result, error, symbol) => [{ type: "Market", id: symbol }],
     }),
 
-    getForexMarkets: builder.query<CryptoItem[], void>({
-      query: () => "/forex",
-      transformResponse: (response: any) => {
-        return response.map((item: any) => ({
-          name: item.symbol,
-          price: item.price,
-          change: item.change_percent.startsWith("+")
-            ? item.change_percent
-            : item.change_percent.startsWith("-")
-              ? item.change_percent
-              : `+${item.change_percent}`,
-          isPositive: !item.change_percent.startsWith("-"),
-        }))
-      },
+    getTrades: builder.query<HistoryItem[], void>({
+      query: () => (
+        {
+          url: "/trade.php",
+          method: "GET",
+        }
+      ),
       providesTags: ["Market"],
     }),
 
@@ -72,4 +66,4 @@ export const marketApi = api.injectEndpoints({
   }),
 })
 
-export const { useGetMarketsQuery, useGetMarketDetailQuery, useGetForexMarketsQuery, useAddTradeMutation } = marketApi
+export const { useGetMarketsQuery, useGetMarketDetailQuery, useGetTradesQuery, useAddTradeMutation } = marketApi

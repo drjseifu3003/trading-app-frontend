@@ -6,13 +6,15 @@ import { logout } from "../store/slices/authSlice"
 import { useGetUserProfileQuery } from "../store/api/userApi"
 import { useState } from "react"
 import PersonalInfoForm from "../components/PersonalInformationModal"
-import ChangePasswordModal from "../components/ChangePasswordModal"
 import { useRouter } from "next/navigation"
+import HistoryModal from "../components/HistoryModal"
+import { ChangePasswordModal } from "../components/changePassword"
 
 const PersonalScreen: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [showChangeLoginPasswordModal, setShowChangeLoginPasswordModal] = useState(false)
   const { data: userProfile, isLoading, error } = useGetUserProfileQuery()
 
@@ -140,7 +142,7 @@ const PersonalScreen: React.FC = () => {
           onClick={() => {
             switch(index) {
               case 0:
-                // setShowPersonalInfoModal(true)
+                setShowHistoryModal(true)
                 break;
               case 1:
                 setShowPersonalInfoModal(true)
@@ -190,9 +192,18 @@ const PersonalScreen: React.FC = () => {
       }
       {
         showChangeLoginPasswordModal && (
-          <ChangePasswordModal onClose={() => setShowChangeLoginPasswordModal(false)} isOpen={showChangeLoginPasswordModal}/>
+          <ChangePasswordModal onOpenChange={() => setShowChangeLoginPasswordModal(false)} open={showChangeLoginPasswordModal}/>
         )
       }
+      {
+        showHistoryModal && (
+          <HistoryModal
+            isOpen={showHistoryModal}
+            onClose={() => setShowHistoryModal(false)}
+          />
+        )
+      }
+
     </div>
   )
 }

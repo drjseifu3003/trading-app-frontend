@@ -45,6 +45,16 @@ export const userApi = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
+    updatePassword: builder.mutation<{message: string}, {old_password:string, password:string}>({
+      query: (formData) => ({
+        url: "/change-password.php",
+        method: "PUT",
+        body: formData,
+        // Do NOT set 'Content-Type' header here, let browser handle it.
+      }),
+      invalidatesTags: ["User"],
+    }),
+
 
     withdrawFunds: builder.mutation<{ success: boolean }, { amount: string; address: string }>({
       query: (data) => ({
@@ -72,4 +82,5 @@ export const {
   useUpdateUserProfileMutation,
   useWithdrawFundsMutation,
   useDepositFundsMutation,
+  useUpdatePasswordMutation
 } = userApi
