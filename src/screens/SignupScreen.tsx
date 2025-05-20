@@ -118,11 +118,21 @@ export function SignupForm() {
             )}
             />
 
+
             <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50" disabled={isLoading}>
             {isLoading ? "Registering..." : "Register"}
             </Button>
+            <div className="text-center mt-4">
+          <p className="text-sm text-gray-600">
+            Aleady have an account?{" "}
+            <a href="/login" className="font-medium text-amber-500 hover:text-amber-400">
+              Login
+            </a>
+          </p>
+        </div>
         </form>
         </Form>
+        
     </div>
   )
 }
