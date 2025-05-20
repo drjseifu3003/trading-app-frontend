@@ -20,6 +20,16 @@ export interface CryptoItem {
   icon?: React.ReactNode
 }
 
+interface TradeResponse {
+  message: string;
+  success: boolean;
+  error: boolean;
+  result: 'win' | 'loss';
+  quantity: number;
+  total_balance: number;
+}
+
+
 export const marketApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getMarkets: builder.query<CryptoItem[], void>({
@@ -55,7 +65,7 @@ export const marketApi = api.injectEndpoints({
       providesTags: ["Market"],
     }),
 
-    addTrade: builder.mutation<{message: string}, { symbol: string, time: string; currency_pair: number, expected_profit_loss: number, final_profit_loss: number }>({
+    addTrade: builder.mutation<TradeResponse, { symbol: string, time: string; currency_pair: number, expected_profit_loss: number, final_profit_loss: number, type: string }>({
       query: (data) => ({
         url: "/trade.php",
         method: "POST",

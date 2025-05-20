@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAddTradeMutation } from "../store/api/marketApi"
+import { useGetUserBalanceQuery } from "../store/api/userApi"
 
 interface OptionsModalProps {
   isOpen: boolean
@@ -49,34 +50,26 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
   price,
   changePercent,
 }) => {
-  const [AddTrade, { isLoading }] = useAddTradeMutation()
+  const {data: userBalance} = useGetUserBalanceQuery()
+  const [AddTrade, { isLoading, data: tradeResponse, isSuccess }] = useAddTradeMutation()
   const [selectedTime, setSelectedTime] = useState<number>(30)
   const [expectedReturn, setExpectedReturn] = useState("0.00")
 
   const [isCountingDown, setIsCountingDown] = useState(false)
   const [timer, setTimer] = useState<number | null>(null)
-
-  const [entryPrice, setEntryPrice] = useState<number | null>(null)
-
-  const [tradeOutcome, setTradeOutcome] = useState<{
-    result: "WIN" | "LOSS"
-    change: number      // % price change
-    exit: number
-  } | null>(null)
+  const [openModal, setOpenModal] = useState<boolean>(false)
 
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
 
   /* Live price ref so we always use the very latest prop value */
   const priceRef = useRef<number>(parseFloat(price))
-  useEffect(() => {
-    priceRef.current = parseFloat(price)
-  }, [price])
 
   /* ───────────── Form ───────────── */
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { quantity: "" },
   })
+
   const quantity = form.watch("quantity")
 
   /* ───────────── Config ───────────── */
@@ -89,6 +82,48 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
     { duration: "300s", seconds: 300, roi: 40 },
   ]
 
+
+  /* ───────────── Countdown helpers ───────────── */
+  const getCurrentPrice = () => priceRef.current
+
+  const startCountdown = async (type: string) => {
+    const amount = parseFloat(quantity)
+    if (isNaN(amount)) return
+    const start = getCurrentPrice()
+    setIsCountingDown(true)
+    setTimer(selectedTime)
+
+    countdownRef.current = setInterval(() => {
+      setTimer((prev) => {
+        if (prev === 1) {
+          clearInterval(countdownRef.current!)
+          finishTrade(start, type)
+          return null
+        }
+        return (prev || 0) - 1
+      })
+    }, 1000)
+  }
+
+  const finishTrade = async (entry: number, type: string) => {
+
+    const exit = getCurrentPrice()
+    const changePct = ((exit - entry) / entry) * 100
+    const outcome = exit < entry ? "WIN" : "LOSS"
+
+    await AddTrade({
+      symbol,
+      currency_pair: parseFloat(quantity),
+      expected_profit_loss: exit,
+      time: selectedTime.toString(),
+      final_profit_loss: exit,
+      type: type
+    }).unwrap()
+
+    setIsCountingDown(false)
+  }
+
+  
   /* ───────────── Expected return calc ───────────── */
   useEffect(() => {
     const amount = parseFloat(quantity || "")
@@ -101,47 +136,6 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
     setExpectedReturn(rtn.toFixed(2))
   }, [quantity, selectedTime])
 
-  /* ───────────── Countdown helpers ───────────── */
-  const getCurrentPrice = () => priceRef.current
-
-  const startCountdown = async () => {
-    const amount = parseFloat(quantity)
-    if (isNaN(amount)) return
-    const start = getCurrentPrice()
-
-    setEntryPrice(start)
-    setTradeOutcome(null)
-    setIsCountingDown(true)
-    setTimer(selectedTime)
-
-    countdownRef.current = setInterval(() => {
-      setTimer((prev) => {
-        if (prev === 1) {
-          clearInterval(countdownRef.current!)
-          finishTrade(start)
-          return null
-        }
-        return (prev || 0) - 1
-      })
-    }, 1000)
-  }
-
-  const finishTrade = async (entry: number) => {
-    const exit = getCurrentPrice()
-    const changePct = ((exit - entry) / entry) * 100
-    const outcome = exit < entry ? "WIN" : "LOSS"
-
-    await AddTrade({
-      symbol,
-      currency_pair: parseFloat(quantity),
-      expected_profit_loss: exit,
-      time: selectedTime.toString(),
-      final_profit_loss: exit,
-    }).unwrap()
-
-    setTradeOutcome({ result: outcome, change: Math.abs(changePct), exit })
-    setIsCountingDown(false)
-  }
 
   useEffect(() => {
     return () => {
@@ -149,11 +143,21 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
     }
   }, [])
 
+    useEffect(() => {
+    priceRef.current = parseFloat(price)
+  }, [price])
+
+
+  useEffect(() => {
+    if(isSuccess && tradeResponse) setOpenModal(true)
+  }, [isSuccess, tradeResponse])
+
   /* ───────────── Render guard ───────────── */
   if (!isOpen) return null
   const isNegative24h = changePercent.startsWith("-")
 
   /* ───────────── JSX ───────────── */
+
 
 
   return (
@@ -239,6 +243,8 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
                           type="number"
                           step="0.01"
                           disabled={isCountingDown}
+                          min={0}
+                          max={userBalance?.balance} // replace `balance` with the actual variable name
                           placeholder="0.00"
                           className="rounded-l-md text-black"
                         />
@@ -254,7 +260,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
                   <span className="w-5 h-5 bg-amber-500 rounded flex items-center justify-center text-xs text-white font-bold mr-2">
                     $
                   </span>
-                  Balance: 0.00&nbsp;USDT
+                  Balance: {userBalance?.balance}&nbsp;USDT
                 </div>
                 <span>Limit: 100 – 499</span>
               </div>
@@ -263,15 +269,16 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
           <div className="flex gap-4 mt-6">
             <button
               type="button"
-              disabled
+              onClick={() => startCountdown("Buy Long")}
+              disabled={isCountingDown || !form.formState.isValid}
               className="flex-1 bg-green-400 cursor-not-allowed text-white py-4 rounded-md font-medium opacity-60"
             >
               Buy Long
             </button>
 
             <button
-              type="submit"
-              onClick={startCountdown}
+              type="button"
+              onClick={() => startCountdown("Sell Short")}
               disabled={isCountingDown || !form.formState.isValid}
               className={`flex-1 py-4 rounded-md font-medium text-white transition ${
                 isCountingDown
@@ -288,28 +295,24 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
           
 
           {/* Outcome */}
-          {tradeOutcome && (
-            <Dialog open={!!tradeOutcome} onOpenChange={(open) => !open && setTradeOutcome(null)}>
+          {/* {isOpen && (
+            <Dialog open={isOpen} onOpenChange={(open) => !open && setOpenModal(false)}>
               <DialogContent
                 className={`text-center p-6 rounded-lg ${
-                  tradeOutcome?.result === "WIN"
+                  tradeResponse?.result === "win"
                     ? "bg-green-50 text-green-700"
                     : "bg-red-50 text-red-700"
                 }`}
               >
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold">
-                    {tradeOutcome?.result === "WIN" ? "🎉 You Win!" : "❌ You Lose"}
+                    {tradeResponse?.result === "win" ? "🎉 You Win!" : "❌ You Lose"}
                   </DialogTitle>
                   <DialogDescription className="text-sm mt-2 font-normal text-inherit">
-                    Entry&nbsp;
-                    {entryPrice?.toFixed(2)} → Exit&nbsp;
-                    {tradeOutcome?.exit.toFixed(2)} (
-                    {tradeOutcome?.change.toFixed(2)}%)
+                    {tradeResponse?.message}
                   </DialogDescription>
                 </DialogHeader>
 
-                {/* Close Button (optional) */}
                 <DialogClose asChild>
                   <button className="mt-4 text-sm font-medium underline hover:text-black">
                     Close
@@ -318,7 +321,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
               </DialogContent>
             </Dialog>
 
-          )}
+          )} */}
         </div>
       </div>
     </div>

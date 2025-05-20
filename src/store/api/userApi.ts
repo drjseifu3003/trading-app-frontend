@@ -14,6 +14,11 @@ export interface UserProfile {
   address?: string
 }
 
+interface SuccessUserBalance {
+  user_id: number;
+  balance: number;
+}
+
 export interface TransactionHistory {
   id: string
   type: "deposit" | "withdrawal" | "trade"
@@ -32,6 +37,11 @@ export const userApi = api.injectEndpoints({
 
     getTransactionHistory: builder.query<TransactionHistory[], void>({
       query: () => "/user/transactions",
+      providesTags: ["Transaction"],
+    }),
+
+    getUserBalance: builder.query<SuccessUserBalance, void>({
+      query: () => "/get_balance.php",
       providesTags: ["Transaction"],
     }),
 
@@ -82,5 +92,6 @@ export const {
   useUpdateUserProfileMutation,
   useWithdrawFundsMutation,
   useDepositFundsMutation,
-  useUpdatePasswordMutation
+  useUpdatePasswordMutation,
+  useGetUserBalanceQuery
 } = userApi

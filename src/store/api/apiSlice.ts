@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import type { RootState } from "../index"
 
 // Define a base URL for your API
-const baseUrl = "http://localhost:8000/api"
+const baseUrl = "https://onchainvip.etoure.com/api"
 
 export const api = createApi({
   reducerPath: "api",

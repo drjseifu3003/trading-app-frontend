@@ -40,7 +40,7 @@ export const login = createAsyncThunk<LoginResponse, LoginCredentials, { rejectV
   async (credentials, { rejectWithValue }) => {
     try {
       // In a real app, this would be an API call
-      const response = await fetch("http://localhost:8000/api/login.php", {
+      const response = await fetch("https://onchainvip.etoure.com/api/login.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export const signup = createAsyncThunk<LoginResponse, LoginCredentials, { reject
   async (credentials, { rejectWithValue }) => {
     try {
       // In a real app, this would be an API call
-      const response = await fetch("http://localhost:8000/api/signup.php", {
+      const response = await fetch("https://onchainvip.etoure.com/api/signup.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

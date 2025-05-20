@@ -11,10 +11,11 @@ interface MarketItem {
 }
 
 interface MarketTableProps {
-  items: MarketItem[]
+  items: MarketItem[],
+  isClick: boolean
 }
 
-const MarketTable: React.FC<MarketTableProps> = ({ items }) => {
+const MarketTable: React.FC<MarketTableProps> = ({ items, isClick }) => {
   const router = useRouter()
   return (
     <table className="w-full">
@@ -28,7 +29,7 @@ const MarketTable: React.FC<MarketTableProps> = ({ items }) => {
       </thead>
       <tbody>
         {items.map((item, index) => (
-          <tr key={index} onClick={() => {router.push(`/market/${item.symbol}`)}} className="cursor-pointer hover:bg-gray-100">
+          <tr key={index} onClick={() => {if(isClick) router.push(`/market/${item.symbol}`)}} className="cursor-pointer hover:bg-gray-100">
             <td className="py-3 px-1 border-b border-gray-200 flex items-center">
               {item.icon && <span className="mr-2">{item.icon}</span>}
               {item.name}

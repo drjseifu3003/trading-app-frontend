@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import SearchBar from "../components/SearchBar"
 import TabGroup from "../components/TabGroup"
 import CryptoCard from "../components/CryptoCard"
@@ -10,40 +10,60 @@ import FeatureCard from "../components/FeatureCard"
 import NavigationArrows from "../components/NavigationArrows"
 import { LockIcon, ClockIcon } from "../components/Icons"
 
+type BinanceTicker = {
+  symbol: string;
+  lastPrice: string;          // string number like "104039.23"
+  priceChangePercent: string; // string number like "-0.08"
+};
+
+type CryptoItem = {
+  name: string;
+  symbol: string;
+  price: string;      // formatted price with commas, e.g. "104,039.23"
+  change: string;     // formatted percent change, e.g. "-0.08%"
+  isPositive: boolean;
+};
+
+const symbolsToTrack = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT', 'BNBUSDT'];
+
 const HomeScreen: React.FC = () => {
   const [ieoTab, setIeoTab] = useState("Popular")
   const [marketTab, setMarketTab] = useState("Forex")
+  
+  const [cryptoItems, setCryptoItems] = useState<CryptoItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const cryptoItems = [
-    {
-      name: "BTC",
-      symbol: "BTCUSDT",
-      price: "104,039.23",
-      change: "-0.08%",
-      isPositive: false,
-    },
-    {
-      name: "ETH",
-      symbol: "ETHUSDT",
-      price: "2,615.33",
-      change: "+3.81%",
-      isPositive: true,
-    },
-    {
-      name: "LTC",
-      price: "102.02",
-      symbol: "LTCUSDT",
-      change: "+1.93%",
-      isPositive: true,
-    },
-    {
-      name: "BNB",
-      price: "662.17",
-      symbol: "BNBUSDT",
-      change: "+1.64%",
-      isPositive: true,
-    },
-  ]
+  // const cryptoItems = [
+  //   {
+  //     name: "BTC",
+  //     symbol: "BTCUSDT",
+  //     price: "104,039.23",
+  //     change: "-0.08%",
+  //     isPositive: false,
+  //   },
+  //   {
+  //     name: "ETH",
+  //     symbol: "ETHUSDT",
+  //     price: "2,615.33",
+  //     change: "+3.81%",
+  //     isPositive: true,
+  //   },
+  //   {
+  //     name: "LTC",
+  //     price: "102.02",
+  //     symbol: "LTCUSDT",
+  //     change: "+1.93%",
+  //     isPositive: true,
+  //   },
+  //   {
+  //     name: "BNB",
+  //     price: "662.17",
+  //     symbol: "BNBUSDT",
+  //     change: "+1.64%",
+  //     isPositive: true,
+  //   },
+  // ]
 
   const forexItems = [
     {
@@ -71,6 +91,49 @@ const HomeScreen: React.FC = () => {
       icon: <span className="text-sm">🇦🇺</span>,
     },
   ]
+
+
+  useEffect(() => {
+    async function fetchCryptoItems() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+        if (!res.ok) throw new Error('Network response was not ok');
+
+        const data: BinanceTicker[] = await res.json();
+
+        const items = symbolsToTrack
+          .map(symbol => {
+            const item = data.find(d => d.symbol === symbol);
+            if (!item) return null;
+
+            const changePercent = parseFloat(item.priceChangePercent);
+
+            return {
+              name: symbol.replace('USDT', ''),
+              symbol: item.symbol,
+              price: parseFloat(item.lastPrice).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }),
+              change: `${changePercent.toFixed(2)}%`,
+              isPositive: changePercent >= 0,
+            };
+          })
+          .filter((item): item is CryptoItem => item !== null);
+
+        setCryptoItems(items);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCryptoItems();
+  }, []);
+
 
   return (
     <div>
@@ -127,7 +190,7 @@ const HomeScreen: React.FC = () => {
         </div>
 
         <div className="mt-4">
-          <MarketTable items={cryptoItems} />
+          <MarketTable items={cryptoItems} isClick={true}/>
         </div>
       </div>
 
@@ -139,7 +202,7 @@ const HomeScreen: React.FC = () => {
         <TabGroup tabs={["Forex", "Crypto", "GOLD"]} activeTab={marketTab} onTabChange={setMarketTab} />
 
         <div className="mt-4">
-          <MarketTable items={forexItems} />
+          <MarketTable items={forexItems} isClick={false}/>
         </div>
       </div>
 
