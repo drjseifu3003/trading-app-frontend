@@ -77,7 +77,7 @@ const HomeScreen: React.FC = () => {
       <SearchBar />
 
       <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
-        <h2 className="text-lg font-bold mb-3">MDEX Pro are powered by the MDEX Pro protocol Trusted by millions</h2>
+        <h2 className="text-lg font-bold mb-3">Eoure Pro are powered by the Etoure Pro protocol Trusted by millions</h2>
 
         <div className="flex justify-center my-5 rounded-lg">
           <img

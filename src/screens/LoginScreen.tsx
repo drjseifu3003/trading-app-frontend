@@ -37,10 +37,10 @@ const LoginScreen: React.FC = () => {
         <div className="text-center">
           <div className="flex justify-center">
             <div className="w-12 h-12 bg-indigo-900 text-white rounded flex items-center justify-center font-bold text-xl">
-              M
+              E
             </div>
           </div>
-          <h2 className="mt-4 text-2xl font-bold text-amber-500">MDEX Pro</h2>
+          <h2 className="mt-4 text-2xl font-bold text-amber-500">Etoure Pro</h2>
           <p className="mt-2 text-gray-600">Sign in to your account</p>
         </div>
 

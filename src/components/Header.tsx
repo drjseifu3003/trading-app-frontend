@@ -11,9 +11,9 @@ const Header: React.FC = () => {
     <header className="flex justify-between items-center p-4 bg-white border-b border-gray-200">
       <div className="flex items-center">
         <div className="w-8 h-8 bg-indigo-900 text-white rounded flex items-center justify-center font-bold mr-2">
-          M
+          E
         </div>
-        <span className="text-lg font-bold text-amber-500">MDEX Pro</span>
+        <span className="text-lg font-bold text-amber-500">Etoure pro</span>
       </div>
       {isAuthenticated && (
         <div className="space-y-1 cursor-pointer">
