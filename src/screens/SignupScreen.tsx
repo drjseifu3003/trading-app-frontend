@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 import { useAppDispatch, useAppSelector } from '../store'
 import { clearError, selectAuth, signup } from '../store/slices/authSlice'
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const formSchema = z
   .object({
@@ -35,12 +35,14 @@ type FormData = z.infer<typeof formSchema>
 export function SignupForm() {
   const dispatch = useAppDispatch()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect") || "/dashboard"
   const { isAuthenticated, isLoading, error } = useAppSelector(selectAuth)
 
     useEffect(() => {
         // If user is already authenticated, redirect to home
         if (isAuthenticated) {
-        router.push("/")
+        router.push(redirectTo)
         }
 
         // Clear any errors when component mounts
@@ -68,10 +70,10 @@ export function SignupForm() {
             <div className="text-center">
             <div className="flex justify-center">
                 <div className="w-12 h-12 bg-indigo-900 text-white rounded flex items-center justify-center font-bold text-xl">
-                M
+                E
                 </div>
             </div>
-            <h2 className="mt-4 text-2xl font-bold text-amber-500">MDEX Pro</h2>
+            <h2 className="mt-4 text-2xl font-bold text-amber-500">Etoure Trading</h2>
             <p className="mt-2 text-gray-600">Sign in to your account</p>
             </div>
             {error && <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">{error}</div>}

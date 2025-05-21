@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import SearchBar from "../components/SearchBar"
 import TabGroup from "../components/TabGroup"
 import CryptoCard from "../components/CryptoCard"
-import MarketTable from "../components/MarketTable"
+import MarketTable, { Coin } from "../components/MarketTable"
 import FeatureCard from "../components/FeatureCard"
 import NavigationArrows from "../components/NavigationArrows"
 import { LockIcon, ClockIcon } from "../components/Icons"
@@ -27,6 +27,8 @@ type CryptoItem = {
 const symbolsToTrack = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT', 'BNBUSDT'];
 
 const HomeScreen: React.FC = () => {
+  
+  const [coins, setCoins] = useState<Coin[]>([]);
   const [ieoTab, setIeoTab] = useState("Popular")
   const [marketTab, setMarketTab] = useState("Forex")
   
@@ -92,47 +94,25 @@ const HomeScreen: React.FC = () => {
     },
   ]
 
-
   useEffect(() => {
-    async function fetchCryptoItems() {
+    async function fetchCoinList() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/24hr');
-        if (!res.ok) throw new Error('Network response was not ok');
-
-        const data: BinanceTicker[] = await res.json();
-
-        const items = symbolsToTrack
-          .map(symbol => {
-            const item = data.find(d => d.symbol === symbol);
-            if (!item) return null;
-
-            const changePercent = parseFloat(item.priceChangePercent);
-
-            return {
-              name: symbol.replace('USDT', ''),
-              symbol: item.symbol,
-              price: parseFloat(item.lastPrice).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }),
-              change: `${changePercent.toFixed(2)}%`,
-              isPositive: changePercent >= 0,
-            };
-          })
-          .filter((item): item is CryptoItem => item !== null);
-
-        setCryptoItems(items);
+        const res = await fetch('https://api.coingecko.com/api/v3/coins/list');
+        if (!res.ok) throw new Error('Failed to fetch coin list');
+        const data: Coin[] = await res.json();
+        setCoins(data);
       } catch (err: any) {
-        setError(err.message || 'Failed to fetch data');
+        setError(err.message || 'An error occurred');
       } finally {
         setLoading(false);
       }
     }
 
-    fetchCryptoItems();
+    fetchCoinList();
   }, []);
+
 
 
   return (
@@ -140,7 +120,7 @@ const HomeScreen: React.FC = () => {
       <SearchBar />
 
       <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
-        <h2 className="text-lg font-bold mb-3">MDEX Pro are powered by the MDEX Pro protocol Trusted by millions</h2>
+        <h2 className="text-lg font-bold mb-3">Etoure Trading is Trusted by millions</h2>
 
         <div className="flex justify-center my-5 rounded-lg">
           <img
@@ -180,23 +160,23 @@ const HomeScreen: React.FC = () => {
       <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
         <h2 className="text-xl font-bold text-center mb-3">IEO Market</h2>
 
-        <TabGroup tabs={["Popular", "Subscribe", "Lottery"]} activeTab={ieoTab} onTabChange={setIeoTab} />
+        {/* <TabGroup tabs={["Popular", "Subscribe", "Lottery"]} activeTab={ieoTab} onTabChange={setIeoTab} /> */}
       </div>
 
       <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
         <div className="flex gap-3 overflow-x-auto py-2">
-          <CryptoCard name="BTCUSDT" price="$104,039.23" change="-0.08%" type="btc" />
-          <CryptoCard name="ETHUSDT" price="$2,615.33" change="+3.81%" type="eth" />
+          <CryptoCard id="bitcoin" name="BTCUSDT" price="$104,039.23" change="-0.08%" type="btc" />
+          <CryptoCard id="ethereum" name="ETHUSDT" price="$2,615.33" change="+3.81%" type="eth" />
         </div>
 
         <div className="mt-4">
-          <MarketTable items={cryptoItems} isClick={true}/>
+          <MarketTable items={coins} isClick={true}/>
         </div>
       </div>
 
       <NavigationArrows />
 
-      <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
+      {/* <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
         <h2 className="text-xl font-bold text-center mb-3">Market dynamics</h2>
 
         <TabGroup tabs={["Forex", "Crypto", "GOLD"]} activeTab={marketTab} onTabChange={setMarketTab} />
@@ -204,7 +184,7 @@ const HomeScreen: React.FC = () => {
         <div className="mt-4">
           <MarketTable items={forexItems} isClick={false}/>
         </div>
-      </div>
+      </div> */}
 
       <NavigationArrows />
 

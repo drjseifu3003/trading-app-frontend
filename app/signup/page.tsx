@@ -1,9 +1,12 @@
 import { SignupForm } from "@/src/screens/SignupScreen"
+import { Suspense } from "react"
 
 
 const SignUpPage = () => {
     return (
-        <SignupForm/>
+        <Suspense fallback={<div>Loading...</div>}>
+            <SignupForm/>
+        </Suspense>
     )
 }
 

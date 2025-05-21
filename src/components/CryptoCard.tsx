@@ -5,13 +5,14 @@ import type React from "react"
 import { useNavigate } from "react-router-dom"
 
 interface CryptoCardProps {
+  id: string,
   name: string
   price: string
   change: string
   type: "btc" | "eth"
 }
 
-const CryptoCard: React.FC<CryptoCardProps> = ({ name, price, change, type }) => {
+const CryptoCard: React.FC<CryptoCardProps> = ({ id, name, price, change, type }) => {
   const router = useRouter()
   const isPositive = change.startsWith("+")
 
@@ -19,7 +20,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ name, price, change, type }) =>
     type === "btc" ? "bg-gradient-to-br from-yellow-300 to-yellow-500" : "bg-gradient-to-br from-gray-100 to-blue-400"
 
   const handleClick = () => {
-    router.push(`/market/${name}`)
+    router.push(`/market/${id}`)
   }
 
   return (

@@ -69,7 +69,7 @@ export const marketApi = api.injectEndpoints({
       query: (data) => ({
         url: "/trade.php",
         method: "POST",
-        body: data,
+        body: {...data, date: new Date()},
       }),
       invalidatesTags: ["Market"],
     })

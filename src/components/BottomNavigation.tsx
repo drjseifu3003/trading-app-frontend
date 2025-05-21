@@ -1,39 +1,45 @@
 "use client"
 
+import { useState } from "react"
 import type React from "react"
+import { useRouter } from "next/navigation"
+
 import { HomeIcon, ChartBarIcon, CircleInfoIcon, BellIcon, UserIcon } from "./Icons"
 
-interface BottomNavigationProps {
-  activeTab: string
-  setActiveTab: (tab: string) => void
-}
+const BottomNavigation: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("home")
+  const router = useRouter()
 
-const BottomNavigation: React.FC<BottomNavigationProps> = ({ activeTab, setActiveTab }) => {
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+    router.push(`/dashboard/${tab}`)
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto flex justify-around items-center bg-white h-16 shadow-[0_-2px_5px_rgba(0,0,0,0.1)]">
       <NavItem
         icon={<HomeIcon active={activeTab === "home"} />}
         label="Home"
         isActive={activeTab === "home"}
-        onClick={() => setActiveTab("home")}
+        onClick={() => handleTabChange("home")}
       />
       <NavItem
         icon={<ChartBarIcon active={activeTab === "trading"} />}
         label="Trading"
         isActive={activeTab === "trading"}
-        onClick={() => setActiveTab("trading")}
+        onClick={() => handleTabChange("trading")}
       />
       <NavItem
         icon={<BellIcon active={activeTab === "news"} />}
         label="News"
         isActive={activeTab === "news"}
-        onClick={() => setActiveTab("news")}
+        onClick={() => handleTabChange("news")}
       />
       <NavItem
         icon={<UserIcon active={activeTab === "personal"} />}
         label="Personal"
         isActive={activeTab === "personal"}
-        onClick={() => setActiveTab("personal")}
+        onClick={() => handleTabChange("personal")}
       />
     </div>
   )

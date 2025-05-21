@@ -9,6 +9,7 @@ import { array } from "zod"
 export interface HistoryItem {
   time: string
   currency_pair: string
+  type: string
   expected_profit_loss: number
   final_profit_loss: number
   symbol: string;
@@ -47,9 +48,10 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
           <table className="w-full text-left text-sm border-collapse">
             <thead>
               <tr className="bg-gray-100 text-gray-700">
-                <th className="p-3">Date</th>
+                {/* <th className="p-3">Date</th> */}
                 <th className="p-3">Time</th>
-                <th className="p-3">Currency Pair</th>
+                <th className="p-3">Amount</th>
+                <th className="p-3">Type</th>
                 <th className="p-3">Expected P/L</th>
                 <th className="p-3">Final P/L</th>
                 <th className="p-3">Symbol</th>
@@ -58,9 +60,10 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
             <tbody>
               {data && (Array.isArray(data) ? data : [data]).map((item, idx) => (
                 <tr key={idx} className="border-b hover:bg-gray-50">
-                    <td className="p-3 whitespace-nowrap">{item?.date ?? "NA"}</td>
+                    {/* <td className="p-3 whitespace-nowrap">{item?.date ?? "NA"}</td> */}
                     <td className="p-3 whitespace-nowrap">{item?.time}</td>
                     <td className="p-3">{item?.currency_pair}</td>
+                    <td className="p-3">{item?.type}</td>
                     <td className="p-3 text-blue-600">{item?.expected_profit_loss}</td>
                     <td className={`p-3 ${item?.final_profit_loss >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                     {item?.final_profit_loss}

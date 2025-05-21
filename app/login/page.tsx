@@ -1,9 +1,12 @@
 import LoginScreen from "@/src/screens/LoginScreen"
+import { Suspense } from "react"
 
 
 const LoginPage = () => {
     return (
-        <LoginScreen/>
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginScreen/>
+        </Suspense>
     )
 }
 

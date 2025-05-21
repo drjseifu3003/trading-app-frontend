@@ -1,7 +1,14 @@
-import App from "../src/App"
+"use client"
 
-const Page = () => {
-  return <App />
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+
+export default function IndexPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace("/dashboard")
+  }, [router])
+
+  return <div>Redirecting to dashboard...</div>
 }
-
-export default Page

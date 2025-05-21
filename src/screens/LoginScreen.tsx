@@ -4,19 +4,21 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../store"
 import { login, selectAuth, clearError } from "../store/slices/authSlice"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect") || "/dashboard"
   const dispatch = useAppDispatch()
   const { isAuthenticated, isLoading, error } = useAppSelector(selectAuth)
 
   useEffect(() => {
     // If user is already authenticated, redirect to home
     if (isAuthenticated) {
-      router.push("/")
+       router.replace(redirectTo)
     }
 
     // Clear any errors when component mounts
@@ -37,10 +39,10 @@ const LoginScreen: React.FC = () => {
         <div className="text-center">
           <div className="flex justify-center">
             <div className="w-12 h-12 bg-indigo-900 text-white rounded flex items-center justify-center font-bold text-xl">
-              M
+              E
             </div>
           </div>
-          <h2 className="mt-4 text-2xl font-bold text-amber-500">MDEX Pro</h2>
+          <h2 className="mt-4 text-2xl font-bold text-amber-500">Etoure Trading</h2>
           <p className="mt-2 text-gray-600">Sign in to your account</p>
         </div>
 
@@ -113,7 +115,7 @@ const LoginScreen: React.FC = () => {
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="/signup" className="font-medium text-amber-500 hover:text-amber-400">
+            <a href={`/signup?redirect=${encodeURIComponent(redirectTo)}`} className="font-medium text-amber-500 hover:text-amber-400">
               Sign up
             </a>
           </p>

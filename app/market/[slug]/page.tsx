@@ -1,3 +1,4 @@
+import ProtectedPage from "@/components/protectedPage";
 import MarketDetailScreen from "@/src/screens/MarketDetailScreen";
 import { CryptoItem } from "@/src/store/api/marketApi";
 
@@ -7,32 +8,36 @@ interface PageProps {
   };
 }
 
-
-type BinanceTicker = {
-  symbol: string;
-  lastPrice: string;          // string number like "104039.23"
-  priceChangePercent: string; // string number like "-0.08"
-};
-
-
 const MarketPage = ({ params }: PageProps) => {
   const { slug } = params;
-  return <MarketDetailScreen slug={slug} />;
+  return (
+    <ProtectedPage>
+      <MarketDetailScreen slug={slug} />
+    </ProtectedPage>
+  );
 };
 
 export default MarketPage;
 
-// ✅ Generate static params from Binance symbols
+// ✅ Generate static params from CoinGecko
 export async function generateStaticParams() {
+  try {
+    // Fetch top coins from CoinGecko (you can limit to a specific number)
+    // const res = await fetch('https://api.coingecko.com/api/v3/coins/list');
+    // const coins: { id: string; symbol: string; name: string }[] = await res.json();
 
-const symbolsToTrack = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT', 'BNBUSDT'];
+    // You can filter to only include top coins you're interested in
+    const coinsToTrack = ['bitcoin', 'ethereum', 'litecoin', 'binancecoin'];
 
-  // const data = await res.json();
+    // const filteredCoins = c.filter((coin) =>
+    //   coinsToTrack.includes(coin.id)
+    // );
 
-  const symbols = symbolsToTrack
-    .map((item) => ({
-      slug: item,
+    return coinsToTrack.map((coin) => ({
+      slug: coin,
     }));
-
-  return symbols;
+  } catch (error) {
+    console.error('Failed to fetch CoinGecko coin list:', error);
+    return [];
+  }
 }
