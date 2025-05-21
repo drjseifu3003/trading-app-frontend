@@ -13,7 +13,7 @@ const Header: React.FC = () => {
         <div className="w-8 h-8 bg-indigo-900 text-white rounded flex items-center justify-center font-bold mr-2">
           E
         </div>
-        <span className="text-lg font-bold text-amber-500">Etoure Trading</span>
+        <span className="text-lg font-bold text-amber-500">Etoure pro</span>
       </div>
       {isAuthenticated && (
         <div className="space-y-1 cursor-pointer">
