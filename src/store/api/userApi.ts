@@ -19,6 +19,13 @@ interface SuccessUserBalance {
   balance: number;
 }
 
+export type WithdrawRequest = {
+  type: 'USDT' | 'ETH' | 'BTC';
+  address: string;
+  amount: number;
+};
+
+
 export interface TransactionHistory {
   id: string
   type: "deposit" | "withdrawal" | "trade"
@@ -45,6 +52,14 @@ export const userApi = api.injectEndpoints({
       providesTags: ["Transaction"],
     }),
 
+    submitWithdraw: builder.mutation<{ message: string }, WithdrawRequest>({
+      query: (withdrawal) => ({
+        url: '/withdraw.php',
+        method: 'POST',
+        body: withdrawal,
+      }),
+    }),
+
     updateUserProfile: builder.mutation<UserProfile, FormData>({
       query: (formData) => ({
         url: "/profile.php",
@@ -68,7 +83,7 @@ export const userApi = api.injectEndpoints({
 
     withdrawFunds: builder.mutation<{ success: boolean }, { amount: string; address: string }>({
       query: (data) => ({
-        url: "/user/withdraw",
+        url: "/withdraw.php",
         method: "POST",
         body: data,
       }),
@@ -93,5 +108,6 @@ export const {
   useWithdrawFundsMutation,
   useDepositFundsMutation,
   useUpdatePasswordMutation,
-  useGetUserBalanceQuery
+  useGetUserBalanceQuery,
+  useSubmitWithdrawMutation
 } = userApi

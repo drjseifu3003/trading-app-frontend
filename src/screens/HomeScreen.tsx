@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import SearchBar from "../components/SearchBar"
 import TabGroup from "../components/TabGroup"
 import CryptoCard from "../components/CryptoCard"
-import MarketTable, { Coin } from "../components/MarketTable"
+import MarketTable from "../components/MarketTable"
 import FeatureCard from "../components/FeatureCard"
 import NavigationArrows from "../components/NavigationArrows"
 import { LockIcon, ClockIcon } from "../components/Icons"
@@ -28,7 +28,7 @@ const symbolsToTrack = ['BTCUSDT', 'ETHUSDT', 'LTCUSDT', 'BNBUSDT'];
 
 const HomeScreen: React.FC = () => {
   
-  const [coins, setCoins] = useState<Coin[]>([]);
+  // const [coins, setCoins] = useState<Coin[]>([]);
   const [ieoTab, setIeoTab] = useState("Popular")
   const [marketTab, setMarketTab] = useState("Forex")
   
@@ -94,24 +94,24 @@ const HomeScreen: React.FC = () => {
     },
   ]
 
-  useEffect(() => {
-    async function fetchCoinList() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/coins/list');
-        if (!res.ok) throw new Error('Failed to fetch coin list');
-        const data: Coin[] = await res.json();
-        setCoins(data);
-      } catch (err: any) {
-        setError(err.message || 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    }
+  // useEffect(() => {
+  //   async function fetchCoinList() {
+  //     setLoading(true);
+  //     setError(null);
+  //     try {
+  //       const res = await fetch('https://api.coingecko.com/api/v3/coins/list');
+  //       if (!res.ok) throw new Error('Failed to fetch coin list');
+  //       const data: Coin[] = await res.json();
+  //       setCoins(data);
+  //     } catch (err: any) {
+  //       setError(err.message || 'An error occurred');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
-    fetchCoinList();
-  }, []);
+  //   fetchCoinList();
+  // }, []);
 
 
 
@@ -170,23 +170,9 @@ const HomeScreen: React.FC = () => {
         </div>
 
         <div className="mt-4">
-          <MarketTable items={coins} isClick={true}/>
+          <MarketTable/>
         </div>
       </div>
-
-      <NavigationArrows />
-
-      {/* <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
-        <h2 className="text-xl font-bold text-center mb-3">Market dynamics</h2>
-
-        <TabGroup tabs={["Forex", "Crypto", "GOLD"]} activeTab={marketTab} onTabChange={setMarketTab} />
-
-        <div className="mt-4">
-          <MarketTable items={forexItems} isClick={false}/>
-        </div>
-      </div> */}
-
-      <NavigationArrows />
 
       <div className="bg-white rounded-lg mx-3 my-4 p-4 shadow">
         <h2 className="text-xl font-bold text-center mb-4">Start your cryptocurrency journey</h2>

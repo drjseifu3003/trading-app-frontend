@@ -120,13 +120,14 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
     const outcome = type === "Buy Long"
       ? exit > entry ? "WIN" : "LOSS"
       : exit < entry ? "WIN" : "LOSS"
-
+      const percent = timeOptions.find(t => t.seconds === selectedTime)?.roi ?? 0
+      
     await AddTrade({
       symbol,
       currency_pair: parseFloat(quantity),
-      expected_profit_loss: exit,
+      expected_profit_loss: percent * parseFloat(quantity),
       time: selectedTime.toString(),
-      final_profit_loss: exit,
+      final_profit_loss: percent * parseFloat(quantity),
       type,
     }).unwrap()
     } catch(err) {
@@ -252,7 +253,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
                           placeholder="0.00"
                           className="text-black"
                           min={0}
-                          max={userBalance?.balance}
+                          // max={userBalance?.balance}
                         />
                       </FormControl>
                       <FormMessage />
@@ -267,7 +268,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
                     </span>
                     Balance: {userBalance?.balance} USDT
                   </div>
-                  <span>Limit: 100 – 499</span>
+                  <span>Limit: 100 – 100000</span>
                 </div>
 
                 <div className="flex gap-4 mt-6">

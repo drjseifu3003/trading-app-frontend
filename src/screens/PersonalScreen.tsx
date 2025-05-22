@@ -9,12 +9,16 @@ import PersonalInfoForm from "../components/PersonalInformationModal"
 import { useRouter } from "next/navigation"
 import HistoryModal from "../components/HistoryModal"
 import { ChangePasswordModal } from "../components/changePassword"
+import DepositModal from "../components/DepositModal"
+import WithdrawModal from "../components/WithdrawModal"
 
 const PersonalScreen: React.FC = () => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const [showPersonalInfoModal, setShowPersonalInfoModal] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [showDepositModal, setShowDepositModal] = useState(false)
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
   const [showChangeLoginPasswordModal, setShowChangeLoginPasswordModal] = useState(false)
   const { data: userProfile, isLoading, error } = useGetUserProfileQuery()
 
@@ -94,7 +98,7 @@ const PersonalScreen: React.FC = () => {
 
         {/* Withdrawal and Recharge buttons */}
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <button className="flex items-center justify-center py-3 border border-gray-300 rounded">
+          <button className="flex items-center justify-center py-3 border border-gray-300 rounded" onClick={() => setShowWithdrawModal(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -112,7 +116,7 @@ const PersonalScreen: React.FC = () => {
             </svg>
             Withdrawal
           </button>
-          <button className="flex items-center justify-center py-3 bg-amber-500 text-white rounded">
+          <button className="flex items-center justify-center py-3 bg-amber-500 text-white rounded" onClick={() => setShowDepositModal(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -200,6 +204,22 @@ const PersonalScreen: React.FC = () => {
           <HistoryModal
             isOpen={showHistoryModal}
             onClose={() => setShowHistoryModal(false)}
+          />
+        )
+      }
+      {
+        showDepositModal && (
+          <DepositModal
+            isOpen={showDepositModal}
+            onClose={() => setShowDepositModal(false)}
+          />
+        )
+      }
+      {
+        showWithdrawModal && (
+          <WithdrawModal
+            isOpen={showWithdrawModal}
+            onClose={() => setShowWithdrawModal(false)}
           />
         )
       }

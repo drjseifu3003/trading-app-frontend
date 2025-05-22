@@ -1,6 +1,7 @@
+// app/market/[slug]/page.tsx
+
 import ProtectedPage from "@/components/protectedPage";
 import MarketDetailScreen from "@/src/screens/MarketDetailScreen";
-import { CryptoItem } from "@/src/store/api/marketApi";
 
 interface PageProps {
   params: {
@@ -10,6 +11,7 @@ interface PageProps {
 
 const MarketPage = ({ params }: PageProps) => {
   const { slug } = params;
+
   return (
     <ProtectedPage>
       <MarketDetailScreen slug={slug} />
@@ -19,25 +21,28 @@ const MarketPage = ({ params }: PageProps) => {
 
 export default MarketPage;
 
-// ✅ Generate static params from CoinGecko
+// ✅ Pre-generate top 10 coin slugs from CoinGecko
 export async function generateStaticParams() {
   try {
-    // Fetch top coins from CoinGecko (you can limit to a specific number)
-    // const res = await fetch('https://api.coingecko.com/api/v3/coins/list');
-    // const coins: { id: string; symbol: string; name: string }[] = await res.json();
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false",
+      {
+        next: { revalidate: 3600 }, // Revalidate every hour (optional)
+      }
+    );
 
-    // You can filter to only include top coins you're interested in
-    const coinsToTrack = ['bitcoin', 'ethereum', 'litecoin', 'binancecoin'];
+    if (!res.ok) {
+      throw new Error("Failed to fetch CoinGecko market data");
+    }
 
-    // const filteredCoins = c.filter((coin) =>
-    //   coinsToTrack.includes(coin.id)
-    // );
+    const coins: { id: string }[] = await res.json();
 
-    return coinsToTrack.map((coin) => ({
-      slug: coin,
+    // Return array of slugs for top 10 coins
+    return coins.map((coin) => ({
+      slug: coin.id,
     }));
   } catch (error) {
-    console.error('Failed to fetch CoinGecko coin list:', error);
+    console.error("Error generating static coin slugs:", error);
     return [];
   }
 }
