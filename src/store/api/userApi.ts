@@ -17,6 +17,7 @@ export interface UserProfile {
 interface SuccessUserBalance {
   user_id: number;
   balance: number;
+  trad_win: boolean;
 }
 
 export type WithdrawRequest = {

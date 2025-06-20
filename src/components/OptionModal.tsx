@@ -44,8 +44,8 @@ const formSchema = z.object({
     .min(1, "Required")
     .refine((v) => {
       const n = parseFloat(v)
-      return !isNaN(n) && n >= 100 && n <= 499
-    }, "Enter an amount between 100 – 499 USDT"),
+      return !isNaN(n) && n >= 100 && n <= 100000
+    }, "Enter an amount between 100 – 100K USDT"),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -87,7 +87,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
     { duration: "300s", seconds: 300, roi: 40 },
   ]
 
-  const getCurrentPrice = () => priceRef.current
+  // const getCurrentPrice = () => priceRef.current
 
   const startCountdown = async (type: string) => {
     if(type === "Buy Long") {
@@ -97,7 +97,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
     }
     const amount = parseFloat(quantity)
     if (isNaN(amount)) return
-    const start = getCurrentPrice()
+    // const start = getCurrentPrice()
     setIsCountingDown(true)
     setTimer(selectedTime)
 
@@ -105,7 +105,7 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
       setTimer((prev) => {
         if (prev === 1) {
           clearInterval(countdownRef.current!)
-          finishTrade(start, type)
+          finishTrade(userBalance?.balance ?? 0, type)
           return null
         }
         return (prev || 0) - 1
@@ -115,20 +115,17 @@ const OptionsModal: React.FC<OptionsModalProps> = ({
 
   const finishTrade = async (entry: number, type: string) => {
     try {
-      const exit = getCurrentPrice()
-    const changePct = ((exit - entry) / entry) * 100
-    const outcome = type === "Buy Long"
-      ? exit > entry ? "WIN" : "LOSS"
-      : exit < entry ? "WIN" : "LOSS"
-      const percent = timeOptions.find(t => t.seconds === selectedTime)?.roi ?? 0
-      
+    const winloss = userBalance?.trad_win ? "WIN" : "LOSS"
+    const percent = timeOptions.find(t => t.seconds === selectedTime)?.roi ?? 0
     await AddTrade({
       symbol,
       currency_pair: parseFloat(quantity),
       expected_profit_loss: percent * parseFloat(quantity),
       time: selectedTime.toString(),
-      final_profit_loss: percent * parseFloat(quantity),
+      final_profit_loss: winloss === "WIN" ? percent * parseFloat(quantity) : parseFloat(quantity),
       type,
+      win: winloss === "WIN" ? true : false,
+      entry
     }).unwrap()
     } catch(err) {
       setIsCountingDown(false)

@@ -65,7 +65,17 @@ export const marketApi = api.injectEndpoints({
       providesTags: ["Market"],
     }),
 
-    addTrade: builder.mutation<TradeResponse, { symbol: string, time: string; currency_pair: number, expected_profit_loss: number, final_profit_loss: number, type: string }>({
+    addTrade: builder.mutation<TradeResponse, { 
+      symbol: string, 
+      currency_pair: number, 
+      expected_profit_loss: number, 
+      time: string; 
+      final_profit_loss: number, 
+      type: string,
+      win: boolean,
+      entry: number
+    }
+      >({
       query: (data) => ({
         url: "/trade.php",
         method: "POST",
